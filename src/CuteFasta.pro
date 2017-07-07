@@ -14,9 +14,9 @@ TEMPLATE = app
 
 SOURCES += main.cpp\
         MainWindow.cpp \
-    FastaDevice.cpp
+    FastaFile.cpp
 
 HEADERS  += MainWindow.h \
-    FastaDevice.h
+    FastaFile.h
 
 FORMS    += MainWindow.ui
