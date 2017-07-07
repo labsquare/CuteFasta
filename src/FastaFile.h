@@ -8,11 +8,11 @@ public:
     FastaFile(const QString& filename);
 
     bool createIndex() const;
-    bool readIndex() const;
+    bool readIndex();
     bool hasIndex() const;
 
-    QStringList seqnames() const;
-    QByteArray sequence(const QString& seqname, quint64 pos = 0);
+    QList<QByteArray> seqnames() const;
+    QByteArray sequence(const QByteArray& seqname, quint64 start = 0, quint64 end = 0);
 
 
     QString indexPath() const;
@@ -29,7 +29,7 @@ private:
 
     };
 
-    QHash<QString, Index> mIndexes;
+    QHash<QByteArray, Index> mIndexes;
 
 };
 

@@ -30,7 +30,7 @@ bool FastaFile::createIndex() const
                     if (!index.seqname.isEmpty())
                         indexes.append(index);
 
-                    index.seqname = line.right(line.length()-1).simplified();
+                    index.seqname = line.right(line.length()-1).trimmed();
                     index.offset = mFile->pos();
                     index.size = 0;
                     index.lineSize = 0;
@@ -39,11 +39,11 @@ bool FastaFile::createIndex() const
 
                 else
                 {
-                    index.size += line.simplified().length();
+                    index.size += line.trimmed().length();
                     // initialization
                     if (index.lineSize == 0)
                     {
-                        index.chompLineSize = line.simplified().length();
+                        index.chompLineSize = line.trimmed().length();
                         index.lineSize = line.size();
                     }
 
@@ -71,36 +71,43 @@ bool FastaFile::createIndex() const
 
             qDebug()<<"Index file writted";
             indexFile.close();
+            return true;
         }
 
     }
 
+    return false;
+
 
 }
 
-bool FastaFile::readIndex() const
+bool FastaFile::readIndex()
 {
     if (hasIndex())
     {
+        mIndexes.clear();
         QFile indexFile(indexPath());
 
         if (indexFile.open(QIODevice::ReadOnly))
         {
 
-            while (!mFile->atEnd()) {
-                QByteArray line = mFile->readLine().simplified();
+            while (!indexFile.atEnd()) {
+                QByteArray line = indexFile.readLine().trimmed();
                 QList<QByteArray> row = line.split(QChar::Tabulation);
-
-
+                mIndexes[row[0]] = {row[0], row[1].toInt(), row[2].toInt(), row[3].toInt(), row[4].toInt()};
 
             }
         }
+        else
+            qDebug()<<"cannot read";
     }
 
     else
     {
         qDebug()<<Q_FUNC_INFO<<"no index";
     }
+
+    return true;
 }
 
 bool FastaFile::hasIndex() const
@@ -108,15 +115,47 @@ bool FastaFile::hasIndex() const
     return QFile::exists(indexPath());
 }
 
-QStringList FastaFile::seqnames() const
+QList<QByteArray> FastaFile::seqnames() const
 {
+    return mIndexes.keys();
+}
+
+QByteArray FastaFile::sequence(const QByteArray &seqname, quint64 start, quint64 end)
+{
+
+
+    if (!mIndexes.contains(seqname))
+        return QByteArray();
+
+
+    Index index = mIndexes[seqname];
+
+    quint64 length = end - start ;
+
+    if (start > end )
+        return QByteArray();
+
+    if (end > index.size)
+        end = index.size;
+
+
+    if (mFile->open(QIODevice::ReadOnly))
+    {
+
+        quint64 offset = index.offset + start + start / index.chompLineSize;
+        mFile->seek(offset);
+
+        return mFile->read(length + (length)/index.chompLineSize).simplified();
+
+
+
+    }
+
+
 
 }
 
-QByteArray FastaFile::sequence(const QString &seqname, quint64 pos)
-{
 
-}
 
 QString FastaFile::indexPath() const
 {

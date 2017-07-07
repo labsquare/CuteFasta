@@ -8,7 +8,10 @@ int main(int argc, char *argv[])
 
     FastaFile device("/home/sacha/hg19.fa");
 
-    device.createIndex();
+    qDebug()<<device.readIndex();
+
+    qDebug()<<device.sequence("chr3", 100000, 100300);
+
 
 
     return 0;
