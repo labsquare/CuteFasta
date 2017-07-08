@@ -4,7 +4,7 @@
 FastaFile::FastaFile(const QString &filename)
     :mFile(new QFile(filename))
 {
-    qDebug()<<mFile->exists();
+    readIndex();
 }
 
 bool FastaFile::createIndex() const
@@ -145,8 +145,12 @@ QByteArray FastaFile::sequence(const QByteArray &seqname, quint64 start, quint64
         quint64 offset = index.offset + start + start / index.chompLineSize;
         mFile->seek(offset);
 
-        return mFile->read(length + (length)/index.chompLineSize).simplified();
+        QByteArray out =  mFile->read(length + (length)/index.chompLineSize);
+        out = out.simplified().replace(" ","");
 
+        mFile->close();
+
+        return out;
 
 
     }
@@ -161,4 +165,9 @@ QString FastaFile::indexPath() const
 {
     QFileInfo info(*mFile);
     return info.absoluteDir().filePath(info.fileName()+".fai");
+}
+
+Index FastaFile::indexOf(const QByteArray &seqName)
+{
+    return mIndexes.value(seqName);
 }

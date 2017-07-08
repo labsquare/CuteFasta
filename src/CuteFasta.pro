@@ -14,9 +14,11 @@ TEMPLATE = app
 
 SOURCES += main.cpp\
         MainWindow.cpp \
-    FastaFile.cpp
+    FastaFile.cpp \
+    FastaViewer.cpp
 
 HEADERS  += MainWindow.h \
-    FastaFile.h
+    FastaFile.h \
+    FastaViewer.h
 
 FORMS    += MainWindow.ui

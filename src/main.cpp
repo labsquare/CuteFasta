@@ -1,18 +1,16 @@
 #include "MainWindow.h"
 #include <QApplication>
 #include "FastaFile.h"
+#include "FastaViewer.h"
 
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
 
-    FastaFile device("/home/sacha/hg19.fa");
-
-    qDebug()<<device.readIndex();
-
-    qDebug()<<device.sequence("chr3", 100000, 100300);
+    FastaViewer * viewer = new FastaViewer;
+    viewer->show();
 
 
 
-    return 0;
+    return a.exec();
 }
