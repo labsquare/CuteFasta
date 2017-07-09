@@ -6,6 +6,7 @@ FastaViewer::FastaViewer(QWidget *parent)
 
     resize(800,600);
     mFile = new FastaFile("/tmp/example/test.fa");
+//    mFile = new FastaFile("/home/sacha/hg19.fa");
 
 
     mFont = QFontDatabase::systemFont(QFontDatabase::FixedFont);
@@ -19,14 +20,15 @@ FastaViewer::FastaViewer(QWidget *parent)
 
 void FastaViewer::setRegion(const QByteArray &seqName, quint64 start)
 {
-    mSeqName = seqName;
-    mStart   = start;
+    mSeqName       = seqName;
+    mCurrentLine   = start / mBasePerLine;
     computeScrollBar();
 }
 
 void FastaViewer::setFontSize(int size)
 {
     mFont.setPointSize(size);
+    computeScrollBar();
     update();
 }
 
@@ -35,9 +37,15 @@ void FastaViewer::setFontSize(int size)
 void FastaViewer::paintEvent(QPaintEvent *event)
 {
 
-    QByteArray seq = mFile->sequence("chr1", mStart, mStart + 10000);
+    int maxLine = viewport()->height() / fontMetrics().height();
 
-    QPainter painter(viewport());
+    int start = mBasePerLine * mCurrentLine;
+
+
+    QByteArray seq = mFile->sequence("chr1", start, start + maxLine * mBasePerLine);
+
+    QPainter painter;
+    painter.begin(viewport());
 
     painter.setFont(mFont);
     painter.setBrush(QBrush(Qt::white));
@@ -47,15 +55,16 @@ void FastaViewer::paintEvent(QPaintEvent *event)
 
 
 //    tbox.adjust(0,0,0,0);
-    tbox.setLeft(200);
+    tbox.setLeft(mNumMargin);
     tbox.setWidth(lineWidth(mBasePerLine));
 
     painter.drawRect(tbox);
 
 
-    for (int y=0,nb = mStart-mBasePerLine; y<= viewport()->height(); y+= fontMetrics().height(),nb += mBasePerLine)
+    for (int y=0,nb = start; y<= viewport()->height(); y+= fontMetrics().height(),nb += mBasePerLine)
     {
-        painter.drawText(0,y, QString::number(nb));
+        QRect rect(0,y, mNumMargin - 5, y + fontMetrics().height());
+        painter.drawText(rect, Qt::AlignRight, QString::number(nb));
     }
 
 
@@ -66,6 +75,7 @@ void FastaViewer::paintEvent(QPaintEvent *event)
     painter.drawText(tbox, QString(seq), option);
 
 
+    painter.end();
 
 
 
@@ -77,7 +87,7 @@ void FastaViewer::scrollContentsBy(int dx, int dy)
 {
     Q_UNUSED(dx);
 
-    mStart += -dy * mBasePerLine;
+    mCurrentLine += -dy;
 
     update();
 
@@ -95,13 +105,10 @@ void FastaViewer::computeScrollBar()
 
     int lineCount = qFloor(mFile->indexOf("chr1").size / mBasePerLine);
 
-    qDebug()<<"line count" << lineCount;
 
+    verticalScrollBar()->setPageStep(maxLine());
+    verticalScrollBar()->setRange(0, lineCount - maxLine() + 1);
 
-    verticalScrollBar()->setPageStep(seqHeight(("chr1")) / viewport()->height());
-    verticalScrollBar()->setRange(0, lineCount);
-
-    qDebug()<<"height"<<seqHeight("chr1")<< " "<< viewport();
 
 
 
@@ -114,7 +121,7 @@ QFontMetrics FastaViewer::fontMetrics() const
 
 int FastaViewer::lineWidth(int baseCount) const
 {
-    return fontMetrics().width(QString("A").repeated(baseCount));
+    return qCeil(fontMetrics().width(QString("A").repeated(baseCount))) + 1;
 }
 
 int FastaViewer::seqHeight(const QString &seqname) const
@@ -122,5 +129,10 @@ int FastaViewer::seqHeight(const QString &seqname) const
     int lineCount = mFile->indexOf("chr1").size / mBasePerLine;
     return fontMetrics().height() * lineCount;
 
+}
+
+int FastaViewer::maxLine() const
+{
+    return qCeil(viewport()->height() / fontMetrics().height());
 }
 

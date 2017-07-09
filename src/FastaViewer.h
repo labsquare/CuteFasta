@@ -28,14 +28,18 @@ protected:
     int lineWidth(int baseCount) const;
     int seqHeight(const QString& seqname) const;
 
+    // return how many lines could be display in the viewport
+    int maxLine() const;
+
 
 
 private:
     FastaFile  * mFile;
     QByteArray mSeqName;
-    quint64 mStart;
     QFont mFont;
     int mBasePerLine = 51;
+    int mCurrentLine = 0;
+    int mNumMargin = 100;
 
 
 
