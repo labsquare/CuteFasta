@@ -61,11 +61,18 @@ void FastaViewer::paintEvent(QPaintEvent *event)
     painter.drawRect(tbox);
 
 
+    // draw number list
     for (int y=0,nb = start; y<= viewport()->height(); y+= fontMetrics().height(),nb += mBasePerLine)
     {
         QRect rect(0,y, mNumMargin - 5, y + fontMetrics().height());
         painter.drawText(rect, Qt::AlignRight, QString::number(nb));
     }
+
+
+    // draw selection
+    QRect selectRect(fontMetrics().width('A') * 2 + mNumMargin, fontMetrics().height() , fontMetrics().width('A') * 10, fontMetrics().height() );
+    painter.setBrush(QColor(0,0,255,50));
+    painter.drawRect(selectRect);
 
 
 
