@@ -7,9 +7,8 @@ int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
 
-    FastaViewer * viewer = new FastaViewer;
-    viewer->show();
-
+    MainWindow win;
+    win.show();
 
 
     return a.exec();

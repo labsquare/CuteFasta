@@ -13,6 +13,9 @@ public:
     FastaViewer(QWidget * parent = nullptr);
     void setRegion(const QByteArray& seqName, quint64 start);
 
+public Q_SLOTS:
+    void setFontSize(int size);
+
 protected:
     void paintEvent(QPaintEvent * event) Q_DECL_OVERRIDE;
     void scrollContentsBy(int dx, int dy) Q_DECL_OVERRIDE;
@@ -20,12 +23,20 @@ protected:
 
     void computeScrollBar();
 
+    QFontMetrics fontMetrics() const;
+
+    int lineWidth(int baseCount) const;
+    int seqHeight(const QString& seqname) const;
+
 
 
 private:
     FastaFile  * mFile;
     QByteArray mSeqName;
     quint64 mStart;
+    QFont mFont;
+    int mBasePerLine = 51;
+
 
 
 

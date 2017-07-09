@@ -124,19 +124,20 @@ QByteArray FastaFile::sequence(const QByteArray &seqname, quint64 start, quint64
 {
 
 
+
     if (!mIndexes.contains(seqname))
         return QByteArray();
 
 
     Index index = mIndexes[seqname];
 
-    quint64 length = end - start ;
-
     if (start > end )
         return QByteArray();
 
     if (end > index.size)
         end = index.size;
+
+    quint64 length = end - start ;
 
 
     if (mFile->open(QIODevice::ReadOnly))
